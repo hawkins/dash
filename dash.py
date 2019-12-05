@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+
+from abc import ABC, abstractmethod
 from os import getenv
 from sys import stderr
 from typing import Optional
@@ -10,7 +13,30 @@ from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-from dash import ScrapeWidget
+load_dotenv()
+
+
+class Widget(ABC):
+    @abstractmethod
+    def __init__(self):
+        super().__init__()
+
+    @abstractmethod
+    def evaluate(self) -> str:
+        return ""
+
+
+class ScrapeWidget(Widget):
+    __driver: Optional[webdriver.Firefox] = None
+
+    @property
+    def driver(self) -> webdriver.Firefox:
+        if self.__driver is None:
+            driver_options = Options()
+            driver_options.headless = True
+            self.__driver = webdriver.Firefox(options=driver_options)
+
+        return self.__driver
 
 
 class EZPVAScrapeWidget(ScrapeWidget):
@@ -40,33 +66,7 @@ class EZPVAScrapeWidget(ScrapeWidget):
         return element.text
 
 
-# driver: Optional[webdriver.Firefox] = None
-# try:
-#     # Log in to E-Z Pass VA
-#     options = Options()
-#     options.headless = True
-#     driver = webdriver.Firefox(options=options)
+if __name__ == "__main__":
+    b = EZPVAScrapeWidget()
 
-#     driver.get("https://www.ezpassva.com/Login/Login.aspx")
-#     el_username = driver.find_element_by_name(
-#         "ctl00$VDOTContentPlaceHolder$txtUserName"
-#     )
-#     el_username.send_keys(username)
-#     el_password = driver.find_element_by_name(
-#         "ctl00$VDOTContentPlaceHolder$txtPassword"
-#     )
-#     el_password.send_keys(password)
-#     el_submit = driver.find_element_by_name("ctl00$VDOTContentPlaceHolder$btnLogin")
-#     el_submit.click()
-
-#     # Check balance
-#     css_balance = "#ctl00_VDOTContentPlaceHolder_grdAccountInfo > tbody > tr:nth-child(6) > td:nth-child(2)"
-#     element = WebDriverWait(driver, 10).until(
-#         EC.presence_of_element_located((By.CSS_SELECTOR, css_balance))
-#     )
-#     print(element.text)
-# except Exception as e:
-#     print(e, file=stderr)
-# finally:
-#     if driver is not None:
-#         driver.quit()
+    print(f"returns: {b.evaluate()}")
